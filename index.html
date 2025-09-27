@@ -1,100 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Finance Tracker</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #f0f2f5, #c9d6ff);
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-    header {
-      background: #2c3e50;
-      color: white;
-      padding: 20px;
-      font-size: 1.8rem;
-    }
-    .container {
-      margin: 40px auto;
-      max-width: 700px;
-      padding: 25px;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-    }
-    h2 {
-      color: #2c3e50;
-      margin-bottom: 15px;
-    }
-    p {
-      font-size: 1.1rem;
-      color: #444;
-      line-height: 1.6;
-    }
-    ol {
-      text-align: left;
-      margin: 20px auto;
-      max-width: 550px;
-      color: #333;
-    }
-    .btn {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 12px 20px;
-      background: #27ae60;
-      color: white;
-      text-decoration: none;
-      border-radius: 8px;
-      transition: background 0.3s;
-    }
-    .btn:hover {
-      background: #219150;
-    }
-    footer {
-      margin-top: 40px;
-      padding: 12px;
-      background: #2c3e50;
-      color: white;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Finance Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        #summary {
+            margin-top: 20px;
+        }
+        .section {
+            margin-top: 30px;
+        }
+    </style>
 </head>
 <body>
-  <header>
-    💸 Finance Tracker (Python CLI)
-  </header>
+    <h1>💸 Finance Tracker 💸</h1>
+    <div class="container">
+        <div class="section">
+            <button onclick="showAddTransaction()">Add Transaction</button>
+            <button onclick="viewTransactions()">View Transactions</button>
+            <button onclick="showSummary()">Summary</button>
+        </div>
 
-  <div class="container">
-    <h2>Welcome to the Finance Tracker</h2>
-    <p>
-      A simple Python project to manage your <b>income</b> and <b>expenses</b>.  
-      It lets you add transactions, view all records, and see a financial summary.
-    </p>
+        <!-- Add Transaction Form -->
+        <div id="addTransactionSection" style="display:none;">
+            <h2>Add Transaction</h2>
+            <form id="transactionForm" onsubmit="addTransaction(event)">
+                <label>Type:</label>
+                <select id="transType" required>
+                    <option value="">Select</option>
+                    <option value="i">Income (+)</option>
+                    <option value="e">Expense (-)</option>
+                </select>
+                <label>Amount ($):</label>
+                <input type="number" id="amount" step="0.01" required />
+                <label>Category:</label>
+                <input type="text" id="category" required />
+                <label>Description:</label>
+                <textarea id="description" required></textarea>
+                <button type="submit">Add</button>
+            </form>
+        </div>
 
-    <h3>📌 Features:</h3>
-    <ul style="text-align:left; max-width:550px; margin:auto; color:#333;">
-      <li>Add Income & Expense transactions</li>
-      <li>View transaction history with category & description</li>
-      <li>Get a financial summary (income, expenses, balance)</li>
-      <li>Data saved in <code>my_finance.txt</code></li>
-    </ul>
+        <!-- View Transactions -->
+        <div id="viewTransactionsSection" style="display:none;">
+            <h2>Transactions</h2>
+            <table id="transactionsTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
 
-    <h3>⚙️ How to Run:</h3>
-    <ol>
-      <li>Make sure Python is installed on your system.</li>
-      <li>Download <a href="my_finance.py">my_finance.py</a>.</li>
-      <li>Open a terminal in the project folder.</li>
-      <li>Run the script using: <code>python my_finance.py</code></li>
-    </ol>
+        <!-- Summary -->
+        <div id="summarySection" style="display:none;">
+            <h2>Financial Summary</h2>
+            <div id="summary"></div>
+        </div>
+    </div>
 
-    <a href="my_finance.py" class="btn" download>⬇ Download Python Script</a>
-  </div>
+    <script>
+        // Load data from local storage or initialize
+        let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
 
-  <footer>
-    &copy; 2025 Finance Tracker | Built with Python 🐍
-  </footer>
+        function saveTransactions() {
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+        }
+
+        function showAddTransaction() {
+            hideAllSections();
+            document.getElementById('addTransactionSection').style.display = 'block';
+        }
+
+        function viewTransactions() {
+            hideAllSections();
+            document.getElementById('viewTransactionsSection').style.display = 'block';
+            displayTransactions();
+        }
+
+        function showSummary() {
+            hideAllSections();
+            document.getElementById('summarySection').style.display = 'block';
+            displaySummary();
+        }
+
+        function hideAllSections() {
+            document.getElementById('addTransactionSection').style.display = 'none';
+            document.getElementById('viewTransactionsSection').style.display = 'none';
+            document.getElementById('summarySection').style.display = 'none';
+        }
+
+        function addTransaction(e) {
+            e.preventDefault();
+            const type = document.getElementById('transType').value;
+            const amount = parseFloat(document.getElementById('amount').value).toFixed(2);
+            const category = document.getElementById('category').value;
+            const description = document.getElementById('description').value;
+            const date = new Date().toISOString().slice(0,10);
+
+            const symbol = type === 'i' ? '+' : '-';
+
+            transactions.push({
+                date,
+                amount: symbol + amount,
+                category,
+                description
+            });
+            saveTransactions();
+            alert('Transaction added successfully!');
+            document.getElementById('transactionForm').reset();
+        }
+
+        function displayTransactions() {
+            const tbody = document.querySelector('#transactionsTable tbody');
+            tbody.innerHTML = '';
+            if (transactions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4">No transactions found.</td></tr>';
+                return;
+            }
+            transactions.forEach(tx => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${tx.date}</td>
+                    <td>${tx.amount}</td>
+                    <td>${tx.category}</td>
+                    <td>${tx.description}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function displaySummary() {
+            let totalIncome = 0;
+            let totalExpense = 0;
+            transactions.forEach(tx => {
+                if (tx.amount.startsWith('+')) {
+                    totalIncome += parseFloat(tx.amount.slice(1));
+                } else {
+                    totalExpense += parseFloat(tx.amount.slice(1));
+                }
+            });
+            const balance = totalIncome - totalExpense;
+            document.getElementById('summary').innerHTML = `
+                <p>Total Income: $${totalIncome.toFixed(2)}</p>
+                <p>Total Expense: $${totalExpense.toFixed(2)}</p>
+                <p>Balance: $${balance.toFixed(2)}</p>
+            `;
+        }
+
+        // Initialize view
+        showAddTransaction();
+    </script>
 </body>
 </html>
